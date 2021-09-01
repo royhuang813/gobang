@@ -1,0 +1,120 @@
+@import url("./reset.css");
+body {
+  background-color: #faf3e3;
+}
+
+#app {
+  display: flex;
+  padding: 10px;
+}
+
+#app #gobang table {
+  position: relative;
+  border-collapse: collapse;
+  background-color: rgba(197, 139, 14, 0.384);
+}
+
+#app #gobang .layout-box {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+#app #gobang .layout-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 40px;
+  height: 1px;
+  background-color: #000;
+}
+
+#app #gobang .layout-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 1px;
+  height: 40px;
+  background-color: #000;
+}
+
+#app #gobang .layout-box-top {
+  height: 20px;
+}
+
+#app #gobang .layout-box-top::before {
+  top: -20px;
+}
+
+#app #gobang .layout-box-top::after {
+  top: 20px;
+}
+
+#app #gobang .layout-box-bottom {
+  height: 20px;
+}
+
+#app #gobang .layout-box-bottom::before {
+  top: 20px;
+}
+
+#app #gobang .layout-box-bottom::after {
+  top: -20px;
+}
+
+#app #gobang .layout-box-left {
+  width: 20px;
+}
+
+#app #gobang .layout-box-left::after {
+  left: -20px;
+}
+
+#app #gobang .layout-box-right {
+  width: 20px;
+}
+
+#app #gobang .layout-box-right::before {
+  left: -20px;
+}
+
+#app #gobang .layout-box-right::after {
+  left: 20px;
+}
+
+#app #gobang .layout-box-point {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#app #gobang .point {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  box-shadow: 1px 1px 5px 0px #eee;
+}
+
+#app #gobang .anchor {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  color: red;
+  text-align: center;
+  line-height: 30px;
+  z-index: 999999;
+  user-select: none;
+}
+
+#app .content {
+  padding: 0 0 0 100px;
+}
