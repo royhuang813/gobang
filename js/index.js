@@ -8,17 +8,44 @@ const app = {
     whiteMove: true,
     rangeX: [8, 8],
     rangeY: [8, 8],
-    exist: {}
+    whiteExist: {},
+    bkExist: {}
   },
   // 判断输赢
-  jurge(x, y) {
+  jurge(x, y, isWhite) {
     console.log('x, y', x, y)
     const whiteArr = document.getElementsByClassName('white-used')
     const bkArr = document.getElementsByClassName('bk-used')
-    // 1. 判断横向是否有5连
-    // 2. 判断竖向是否有5连
-    // 3. 判断/向是否有5连
-    // 4. 判断\向是否有5连
+    // 1. 获取当前下的棋子的x,y坐标，并基于此进行如下判断：
+    // 2. 判断横向是否有5连
+    // 3. 判断竖向是否有5连
+    // 4. 判断/向是否有5连
+    // 5. 判断\向是否有5连
+
+    let exist = isWhite ? 'whiteExist' : 'bkExist'
+    if (this.data[exist][y].length >= 5) {
+      let result
+      if (this.data[exist][y].indexOf(x - 4) !== -1) {
+        result = isContinuous(this.data[exist][y], this.data[exist][y].indexOf(x - 4), 5)
+      } else if (this.data[exist][y].lastIndexOf(x + 4) !== -1) {
+        result = isContinuous(this.data[exist][y], this.data[exist][y].lastIndexOf(x), 5)
+      }
+      console.log('result', result)
+
+      // 递归判断是否连续5次
+      function isContinuous(arr, index, max) {
+        if (index < (max - 1)) {
+          if (arr[index] + 1 === arr[index + 1]) {
+            isContinuous(arr, ++index, max)
+          } else {
+            return false
+          }
+        } else {
+          console.log('rrrr')
+          return true
+        }
+      }
+    }
   },
   // 点击下棋事件监听
   eventListener() {
@@ -48,24 +75,29 @@ const app = {
           if (this.data.whiteMove) {
             point = new Point({ x: x, y: y, color: '#fff' })
             e.target.classList.add('white-used')
+            addExist(this, true)
             this.data.whiteMove = false
             document.getElementsByClassName('player')[0].innerText = '黑'
           } else {
             point = new Point({ x: x, y: y, color: '#000' })
             e.target.classList.add('bk-used')
+            addExist(this, false)
             this.data.whiteMove = true
             document.getElementsByClassName('player')[0].innerText = '白'
           }
           point.put()
 
-          // 更新已下棋子的坐标记录，key为y坐标，value为数组，每个item则为x坐标
-          if (!this.data.exist[y]) {
-            this.data.exist[y] = [x]
-          } else {
-            this.data.exist[y].push(x)
-            this.data.exist[y] = this.data.exist[y].sort((a, b) => a - b)
+          function addExist(that, isWhite) {
+            // 更新已下棋子的坐标记录，key为y坐标，value为数组，每个item则为x坐标
+            let exist = isWhite ? 'whiteExist' : 'bkExist'
+            if (!that.data[exist][y]) {
+              that.data[exist][y] = [x]
+            } else {
+              that.data[exist][y].push(x)
+              that.data[exist][y] = that.data[exist][y].sort((a, b) => a - b)
+            }
+            that.jurge(x, y, isWhite)
           }
-          this.jurge(x, y)
         }
       }
     })
