@@ -6,45 +6,82 @@ const app = {
   data: {
     size: 15,
     whiteMove: true,
-    rangeX: [8, 8],
-    rangeY: [8, 8],
-    whiteExist: {},
-    bkExist: {}
+    exist: null
   },
   // 判断输赢
-  jurge(x, y, isWhite) {
+  jurge(x, y, type) {
     console.log('x, y', x, y)
-    const whiteArr = document.getElementsByClassName('white-used')
-    const bkArr = document.getElementsByClassName('bk-used')
+    console.log('data', this.data.exist)
     // 1. 获取当前下的棋子的x,y坐标，并基于此进行如下判断：
     // 2. 判断横向是否有5连
     // 3. 判断竖向是否有5连
     // 4. 判断/向是否有5连
     // 5. 判断\向是否有5连
 
-    let exist = isWhite ? 'whiteExist' : 'bkExist'
-    if (this.data[exist][y].length >= 5) {
-      let result
-      if (this.data[exist][y].indexOf(x - 4) !== -1) {
-        result = isContinuous(this.data[exist][y], this.data[exist][y].indexOf(x - 4), 5)
-      } else if (this.data[exist][y].lastIndexOf(x + 4) !== -1) {
-        result = isContinuous(this.data[exist][y], this.data[exist][y].lastIndexOf(x), 5)
-      }
-      console.log('result', result)
+    let result = {
+      row: false,
+      col: false,
+      slant: false
+    }
 
-      // 递归判断是否连续5次
-      function isContinuous(arr, index, max) {
-        if (index < (max - 1)) {
-          if (arr[index] + 1 === arr[index + 1]) {
-            isContinuous(arr, ++index, max)
-          } else {
-            return false
-          }
-        } else {
-          console.log('rrrr')
-          return true
+    result.row = rowJurge(this.data.exist[y], x)
+    result.col = colJurge(generateYarr(this), y)
+
+    // 横向判断
+    function rowJurge(xArr, x) {
+      let r = false
+      if (x === 0) { // 当前棋子处于最左侧
+        if (xArr[x] === xArr[1] &&
+          xArr[x] === xArr[2] &&
+          xArr[x] === xArr[3] &&
+          xArr[x]=== xArr[4]) {
+          r = true
         }
+      } else if (x === 14) { // 当前棋子处于最右侧
+        if (xArr[x] === xArr[13] &&
+          xArr[x] === xArr[12] &&
+          xArr[x] === xArr[11] &&
+          xArr[x] === xArr[10]) {
+          r = true
+        }
+      } else { // 当前棋子处于中间（非左右两端）
       }
+      return r
+    }
+    function generateYarr(that) {
+      let yArr = []
+      for (let i = 0; i < 15; i++) {
+        yArr.push(that.data.exist[i][x])
+      }
+      return yArr
+    }
+    // 竖向判断
+    function colJurge(yArr, y) {
+      let r = false
+      if (y === 0) { // 当前棋子处于最顶侧
+        if (yArr[y] === yArr[1] &&
+          yArr[y] === yArr[2] &&
+          yArr[y] === yArr[3] &&
+          yArr[y]=== yArr[4]) {
+          r = true
+        }
+      } else if (y === 14) { // 当前棋子处于最底侧
+        if (yArr[14] === yArr[13] &&
+          yArr[14] === yArr[12] &&
+          yArr[14] === yArr[11] &&
+          yArr[14] === yArr[10]) {
+          r = true
+        }
+      } else { // 当前棋子处于中间（非上下两端）
+      }
+      return r
+    }
+    // 斜向判断
+    function slantJurge() {
+    }
+    console.log('gameover', result, type)
+    if (result.row || result.col || result.slant) {
+      document.getElementsByClassName('who-win')[0].innerText = type === 0 ? '白方胜' : '黑方胜'
     }
   },
   // 点击下棋事件监听
@@ -56,47 +93,27 @@ const app = {
           let [x, y] = dataset.index.split('-')
           x = Number(x)
           y = Number(y)
-
-          // 统计x和y坐标上存在棋子的最小和最大区间，用于优化实时计算结果的速度
-          if (x < this.data.rangeX[0]) {
-            this.data.rangeX[0] = x
-          } else if (x > this.data.rangeX[1]) {
-            this.data.rangeX[1] = x
-          }
-          if (y < this.data.rangeY[0]) {
-            this.data.rangeY[0] = y
-          } else if (y > this.data.rangeY[1]) {
-            this.data.rangeY[1] = y
-          }
-          // document.getElementsByClassName('player')[0].innerText = `${this.data.rangeX}--${this.data.rangeY}`
-
           // 添加棋子节点
           let point = null
           if (this.data.whiteMove) {
             point = new Point({ x: x, y: y, color: '#fff' })
             e.target.classList.add('white-used')
-            addExist(this, true)
+            record(this, 0)
             this.data.whiteMove = false
             document.getElementsByClassName('player')[0].innerText = '黑'
           } else {
             point = new Point({ x: x, y: y, color: '#000' })
             e.target.classList.add('bk-used')
-            addExist(this, false)
+            record(this, 1)
             this.data.whiteMove = true
             document.getElementsByClassName('player')[0].innerText = '白'
           }
           point.put()
 
-          function addExist(that, isWhite) {
-            // 更新已下棋子的坐标记录，key为y坐标，value为数组，每个item则为x坐标
-            let exist = isWhite ? 'whiteExist' : 'bkExist'
-            if (!that.data[exist][y]) {
-              that.data[exist][y] = [x]
-            } else {
-              that.data[exist][y].push(x)
-              that.data[exist][y] = that.data[exist][y].sort((a, b) => a - b)
-            }
-            that.jurge(x, y, isWhite)
+          // 记录已下棋子的数据，type为0：代表白方，为1：代表黑方
+          function record(that, type) {
+            that.data.exist[15 - y][x - 1] = type
+            that.jurge(x - 1, 15 - y, type)
           }
         }
       }
@@ -107,6 +124,7 @@ const app = {
     const layout = new Layout({ size: this.data.size })
     const dom = layout.generate()
     document.getElementById('gobang').innerHTML = dom
+    this.data.exist = layout.getData()
   }
 }
 
@@ -142,6 +160,17 @@ class Layout {
   constructor({ size }) {
     this.size = size
   }
+  // 获取棋盘初始数据，以二维数组描述棋盘   [[...''], [...''], ...[...'']]
+  getData() {
+    let row = 0
+    let arr = []
+    while(row < this.size) {
+      arr.push(new Array(this.size))
+      row++
+    }
+    return arr
+  }
+  // 生成棋盘dom
   generate() {
     const layoutDom = generateRow(this.size)
     return `<table>
